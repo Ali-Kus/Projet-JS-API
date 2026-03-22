@@ -20,7 +20,9 @@
           <input
             type="text"
             class="champ-texte"
-            placeholder="Entrez votre texte..." />
+            placeholder="Entrez votre nom de pays..."
+            list="suggestions-pays" />
+          <datalist id="suggestions-pays"></datalist>
           <button type="submit" class="bouton-submit">Envoyer</button>
         </form>
 
@@ -30,6 +32,6 @@
       </section>
     </main>
 
-    <script src="src/script.js"></script>
+    <script type="module" src="src/main.js"></script>
   </body>
 </html>
