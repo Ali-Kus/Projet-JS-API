@@ -1,0 +1,217 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+main {
+  margin-top: 20px;
+  width: 100%;
+  height: 500px;
+}
+pre {
+  background-color: #272822;
+  color: #f8f8f2;
+  padding: 15px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.container {
+  align-items: flex-start;
+  min-height: 500px;
+
+  margin: 0 auto; /* Centre le conteneur horizontalement */
+  display: flex; /* On remplace grid par flex */
+  flex-direction: row; /* Pour un alignement horizontal (c'est la valeur par défaut, mais c'est bien de le préciser) */
+  background-color: #6f42c1; /* J'ai mis un violet qui ressemble à ton image */
+  /* J'ai retiré le width et height fixes pour que ça s'adapte à ton écran */
+}
+
+.item {
+  background-color: #f0ad4e; /* Couleur orange de l'image */
+  color: white;
+  margin: 5px;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+
+  /* La magie opère ici : chaque élément prend 1 part d'espace disponible par défaut */
+  flex-grow: 1;
+  flex-basis: 0; /* Assure que la largeur de base est de 0 avant de distribuer l'espace */
+}
+
+/* Cette classe spécifique est pour l'élément du milieu de la 2ème ligne */
+.item-double {
+  flex-grow: 2; /* Cet élément prendra 2 parts d'espace, donc le double des autres */
+}
+.parent {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 12px;
+  padding: 12px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.parent > div {
+  background-color: #ffffff;
+  color: #0f172a;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  text-align: left;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.parent img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+}
+
+.parent p {
+  margin: 0 0 6px 0;
+}
+
+.parent p:last-child {
+  margin-bottom: 0;
+}
+
+.div1 {
+  grid-column: span 2 / span 2;
+}
+
+.div2 {
+  grid-column: span 2 / span 2;
+  grid-row: span 2 / span 2;
+  grid-column-start: 3;
+}
+
+.div3 {
+  grid-column-start: 5;
+}
+
+.div4 {
+  grid-row: span 2 / span 2;
+  grid-column-start: 5;
+  grid-row-start: 2;
+}
+
+.div5 {
+  grid-column: span 2 / span 2;
+  grid-column-start: 3;
+  grid-row-start: 3;
+}
+
+.div6 {
+  grid-row: span 2 / span 2;
+  grid-column-start: 1;
+  grid-row-start: 2;
+}
+
+.div7 {
+  grid-row: span 2 / span 2;
+  grid-column-start: 2;
+  grid-row-start: 2;
+}
+
+.div8 {
+  grid-column: span 3 / span 3;
+  grid-row: span 2 / span 2;
+  grid-column-start: 2;
+  grid-row-start: 4;
+}
+
+.div9 {
+  grid-row: span 2 / span 2;
+  grid-column-start: 5;
+  grid-row-start: 4;
+}
+
+.div11 {
+  grid-column-start: 1;
+  grid-row-start: 4;
+}
+
+.div12 {
+  grid-row-start: 5;
+}
+
+/* On aligne l'input et le bouton côte à côte */
+.formulaire-propre {
+  display: flex;
+  gap: 10px; /* L'espace entre le champ et le bouton */
+}
+
+/* Le style du champ de texte */
+.champ-texte {
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 2px solid #e2e8f0; /* Une bordure grise très claire */
+  border-radius: 8px; /* Des bords joliment arrondis */
+  outline: none; /* Enlève la bordure bleue moche par défaut du navigateur */
+  transition: border-color 0.3s ease; /* Rend le changement de couleur fluide */
+  flex-grow: 1; /* Permet au champ de prendre l'espace restant si besoin */
+}
+
+/* L'effet quand l'utilisateur clique dans le champ pour taper */
+.champ-texte:focus {
+  border-color: #6f42c1; /* La bordure prend ta couleur violette */
+}
+
+/* Le style du bouton */
+.bouton-submit {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: #6f42c1;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer; /* Affiche la petite main au survol */
+  transition:
+    background-color 0.3s ease,
+    transform 0.1s ease;
+}
+
+/* L'effet quand on passe la souris sur le bouton */
+.bouton-submit:hover {
+  background-color: #59359a; /* Un violet légèrement plus foncé */
+}
+
+/* L'effet d'enfoncement quand on clique sur le bouton */
+.bouton-submit:active {
+  transform: scale(0.96); /* Réduit le bouton de 4% pour simuler un vrai clic */
+}

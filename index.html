@@ -1,11 +1,35 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Appel API UCDP</title>
+    <link rel="stylesheet" href="style/style.css" />
   </head>
+
   <body>
-    <script src="script.js"></script>
+    <main>
+      <div class="containeer">
+        <h1>Données UCDP</h1>
+        <button id="fetch-btn">Récupérer les événements</button>
+        <pre id="result">Les résultats s'afficheront ici...</pre>
+      </div>
+      <section>
+
+
+        <form class="recherche-form">
+          <input
+            type="text"
+            class="champ-texte"
+            placeholder="Entrez votre texte..." />
+          <button type="submit" class="bouton-submit">Envoyer</button>
+        </form>
+
+        
+        <div id="resultat-pays" class="parent" >
+        </div>
+      </section>
+    </main>
+
+    <script src="src/script.js"></script>
   </body>
 </html>
