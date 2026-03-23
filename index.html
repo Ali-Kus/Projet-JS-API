@@ -1,37 +1,69 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Appel API UCDP</title>
-    <link rel="stylesheet" href="style/style.css" />
-  </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Census - Analyse Démographique Mondiale</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Favoris -->
+        <aside class="sidebar">
+            <h2>Favoris</h2>
+            <div class="sidebar-help">
+                <a href="DEMARRAGE_RAPIDE.txt" class="help-link" target="_blank" title="Aide rapide">
+                    ❓ Aide
+                </a>
+            </div>
+            <div id="favorites-list" class="favorites-list">
+                <p id="empty-favorites-msg">Aucune recherche favorite</p>
+            </div>
+        </aside>
 
-  <body>
-    <main>
-      <div class="containeer">
-        <h1>Données UCDP</h1>
-        <button id="fetch-btn">Récupérer les événements</button>
-        <pre id="result">Les résultats s'afficheront ici...</pre>
-      </div>
-      <section>
+        <!-- Contenu Principal -->
+        <main class="main-content">
+            <header>
+                <h1>Analyse Démographique Mondiale</h1>
+                <p class="subtitle">API Census - Données Mondiales de Population</p>
+            </header>
 
+            <!-- Formulaire de Recherche -->
+            <section class="search-section">
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        id="input-search" 
+                        placeholder="Entrez le nom d'un pays..."
+                        aria-label="Rechercher un pays"
+                    >
+                    <button id="btn-search" disabled aria-label="Lancer la recherche">
+                        Rechercher
+                    </button>
+                </div>
+            </section>
 
-        <form class="recherche-form">
-          <input
-            type="text"
-            class="champ-texte"
-            placeholder="Entrez votre nom de pays..."
-            list="suggestions-pays" />
-          <datalist id="suggestions-pays"></datalist>
-          <button type="submit" class="bouton-submit">Envoyer</button>
-        </form>
+            <!-- Loader d'attente -->
+            <div id="bloc-gif-attente" class="loader-container hidden">
+                <div class="spinner"></div>
+                <p>Chargement des données...</p>
+            </div>
 
-        
-        <div id="resultat-pays" class="parent" >
-        </div>
-      </section>
-    </main>
+            <!-- Zone des Résultats -->
+            <section class="results-section">
+                <div id="results-container" class="results-container">
+                    <p id="no-results-msg" class="message">Veillez lancer une recherche</p>
+                </div>
+            </section>
 
-    <script type="module" src="src/main.js"></script>
-  </body>
+            <!-- Zone d'erreur -->
+            <div id="error-container" class="error-container hidden" role="alert">
+                <p id="error-message"></p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts avec modules ES6 -->
+    <script type="module" src="js/main2.js"></script>
+</body>
 </html>
