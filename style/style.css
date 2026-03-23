@@ -1,255 +1,202 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap");
-
+/* =========================================
+   Variables Globales (Concision et Cohérence)
+   ========================================= */
 :root {
-  --fond-1: #0b0c10;
-  --fond-2: #111827;
-  --verre: rgba(17, 24, 39, 0.55);
-  --bordure: rgba(148, 163, 184, 0.18);
-  --texte: #e5e7eb;
-  --texte-doux: #cbd5f5;
-  --accent: #22d3ee;
+  --bg-color: #f8f9fa;
+  --text-color: #212529;
+  --text-muted: #6c757d;
+  --primary-color: #0d6efd;
+  --primary-hover: #0b5ed7;
+  --border-color: #dee2e6;
+  --card-bg: #ffffff;
+  --radius: 8px;
+  --spacing: 1.5rem;
+}
+
+/* =========================================
+   Reset et Base (Lisibilité)
+   ========================================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  font-family: "Space Grotesk", "Segoe UI", Tahoma, sans-serif;
-  background:
-    radial-gradient(
-      800px 400px at 10% 10%,
-      rgba(34, 211, 238, 0.18),
-      transparent 60%
-    ),
-    radial-gradient(
-      900px 500px at 90% 20%,
-      rgba(96, 165, 250, 0.18),
-      transparent 60%
-    ),
-    linear-gradient(180deg, var(--fond-1), var(--fond-2));
-  color: var(--texte);
-  padding: 24px;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  padding: 2rem 1rem;
   display: flex;
   justify-content: center;
-  min-height: 100vh;
 }
 
 main {
-  margin-top: 16px;
-  width: min(1500px, 100%);
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: var(--text-color);
+}
+
+/* =========================================
+   Formulaires et Boutons (Guidage et Feedback)
+   ========================================= */
+.recherche-form {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: var(--spacing);
+}
+
+.champ-texte {
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 400px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.champ-texte:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25); /* Feedback visuel clair */
 }
 
 button {
-  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
-  color: #0b0c10;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background-color: var(--primary-color);
   border: none;
-  padding: 12px 16px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-  box-shadow: 0 10px 25px rgba(34, 211, 238, 0.2);
+  transition: background-color 0.2s ease;
 }
 
-button:hover {
-  filter: brightness(1.05);
-}
-pre {
-  background: rgba(15, 23, 42, 0.7);
-  color: var(--texte);
-  padding: 16px;
-  border-radius: 12px;
-  overflow-x: auto;
-  margin-top: 16px;
-  border: 1px solid var(--bordure);
-  backdrop-filter: blur(10px);
+button:hover:not(:disabled) {
+  background-color: var(--primary-hover);
 }
 
-.containeer {
-  align-items: flex-start;
-  min-height: 120px;
-  margin: 0 auto 18px;
-  padding: 18px;
-  display: flex;
-  gap: 12px;
-  flex-direction: column;
-  align-items: stretch;
-  background: var(--verre);
-  border: 1px solid var(--bordure);
-  border-radius: 14px;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+button:disabled {
+  background-color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6; /* Signifiance de l'état inactif */
 }
 
-.containeer > * {
-  width: 100%;
-}
-
-.item,
-.item-double {
-  background-color: rgba(15, 23, 42, 0.6);
-  color: var(--texte);
-  margin: 5px;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  border: 1px solid var(--bordure);
-  backdrop-filter: blur(12px);
-}
+/* =========================================
+   Structure des Données (Groupement / Distinction)
+   ========================================= */
 .parent {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(5, 1fr);
-  gap: 12px;
-  padding: 12px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid var(--bordure);
-  border-radius: 14px;
-  backdrop-filter: blur(14px);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
 }
 
+/* Styles communs pour toutes les cartes (.div1 à .div12) */
 .parent > div {
-  background: rgba(2, 6, 23, 0.6);
-  color: var(--texte);
-  padding: 16px;
-  border-radius: 10px;
-  border: 1px solid var(--bordure);
-  text-align: left;
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
-  line-height: 1.5;
-  font-size: 14px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: var(--spacing);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centrage horizontal */
+  justify-content: center; /* Centrage vertical */
+  text-align: center; /* Centrage du texte */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
+/* Exception pour la carte d'informations principales (plus dense) */
+.div2.information {
+  grid-column: 1 / -1; /* Prend toute la largeur disponible */
+  align-items: flex-start;
+  text-align: left;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.div2.information p {
+  width: 100%;
+  border-bottom: 1px solid var(--bg-color);
+  padding-bottom: 0.25rem;
+}
+
+.div2.information p:first-child {
+  grid-column: 1 / -1;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+/* =========================================
+   Images et Typographie Spécifique
+   ========================================= */
 .parent img {
   max-width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 8px;
-  border: 1px solid var(--bordure);
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
-.parent p {
-  margin: 0 0 6px 0;
+/* Titres des cartes de métriques (ex: "Population (2000)") */
+.parent > div:not(.information) > p:first-child {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
 }
 
-.parent p:last-child {
-  margin-bottom: 0;
+/* Valeurs des cartes de métriques */
+.parent > div:not(.information) > p:nth-child(2) {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-color);
 }
 
-.div1 {
-  grid-column: span 2 / span 2;
+/* =========================================
+   Section UCDP (Conteneur supérieur)
+   ========================================= */
+.containeer {
+  background-color: var(--card-bg);
+  padding: var(--spacing);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  text-align: center;
 }
 
-.div2 {
-  grid-column: span 2 / span 2;
-  grid-row: span 2 / span 2;
-  grid-column-start: 3;
-}
-
-.div3 {
-  grid-column-start: 5;
-}
-
-.div4 {
-  grid-row: span 2 / span 2;
-  grid-column-start: 5;
-  grid-row-start: 2;
-}
-
-.div5 {
-  grid-column: span 2 / span 2;
-  grid-column-start: 3;
-  grid-row-start: 3;
-}
-
-.div6 {
-  grid-row: span 2 / span 2;
-  grid-column-start: 1;
-  grid-row-start: 2;
-}
-
-.div7 {
-  grid-row: span 2 / span 2;
-  grid-column-start: 2;
-  grid-row-start: 2;
-}
-
-.div8 {
-  grid-column: span 3 / span 3;
-  grid-row: span 2 / span 2;
-  grid-column-start: 2;
-  grid-row-start: 4;
-}
-
-.div9 {
-  grid-row: span 2 / span 2;
-  grid-column-start: 5;
-  grid-row-start: 4;
-}
-
-.div11 {
-  grid-column-start: 1;
-  grid-row-start: 4;
-}
-
-.div12 {
-  grid-row-start: 5;
-}
-
-/* On aligne l'input et le bouton côte à côte */
-.formulaire-propre,
-.recherche-form {
-  display: flex;
-  gap: 10px; /* L'espace entre le champ et le bouton */
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-/* Le style du champ de texte */
-.champ-texte {
-  padding: 12px 16px;
-  font-size: 16px;
-  border: 1px solid var(--bordure);
-  border-radius: 8px; /* Des bords joliment arrondis */
-  outline: none; /* Enlève la bordure bleue moche par défaut du navigateur */
-  transition: border-color 0.3s ease; /* Rend le changement de couleur fluide */
-  flex-grow: 1; /* Permet au champ de prendre l'espace restant si besoin */
-  min-width: 220px;
-  background: rgba(15, 23, 42, 0.65);
-  color: var(--texte);
-}
-
-/* L'effet quand l'utilisateur clique dans le champ pour taper */
-.champ-texte:focus {
-  border-color: var(--accent);
-}
-
-/* Le style du bouton */
-.bouton-submit {
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: bold;
-  color: #0b0c10;
-  background: linear-gradient(135deg, #22d3ee, #38bdf8);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer; /* Affiche la petite main au survol */
-  flex-shrink: 0;
-  transition:
-    background-color 0.3s ease,
-    transform 0.1s ease;
-}
-
-/* L'effet quand on passe la souris sur le bouton */
-.bouton-submit:hover {
-  filter: brightness(1.05);
-}
-
-.bouton-submit:disabled {
-  cursor: not-allowed;
-  filter: grayscale(0.4) brightness(0.8);
-  box-shadow: none;
-  opacity: 0.7;
-}
-
-/* L'effet d'enfoncement quand on clique sur le bouton */
-.bouton-submit:active {
-  transform: scale(0.96); /* Réduit le bouton de 4% pour simuler un vrai clic */
+#result {
+  background-color: var(--bg-color);
+  padding: 1rem;
+  border-radius: var(--radius);
+  margin-top: 1rem;
+  text-align: left;
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  font-family: monospace;
+  font-size: 0.9rem;
 }

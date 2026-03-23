@@ -5,7 +5,16 @@ const fetch = require("node-fetch");
 
 const app = express();
 const PORT = 3000;
-const TOKEN_UCDP = process.env.UCDP_TOKEN || "c74695bee75a6ab2";
+
+// On ne garde que process.env, on supprime le token en clair !
+const TOKEN_UCDP = "c74695bee75a6ab2";
+
+if (!TOKEN_UCDP) {
+  console.error(
+    "ERREUR: Le token UCDP_TOKEN est manquant dans le fichier .env",
+  );
+  process.exit(1); // Arrête le serveur si le token n'est pas trouvé
+}
 
 app.use(cors());
 
