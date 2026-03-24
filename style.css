@@ -52,8 +52,10 @@ body {
     background-color: var(--primary-color);
     color: var(--white);
     padding: 1.5rem;
-    overflow-y: auto;
+    overflow: hidden;
     box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar h2 {
@@ -64,7 +66,14 @@ body {
 }
 
 .sidebar-help {
-    margin-bottom: 1rem;
+    margin-top: auto;
+    align-self: flex-start;
+}
+
+.favorites-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .help-link {
@@ -77,6 +86,15 @@ body {
     font-size: 0.85rem;
     transition: var(--transition);
     border: 1px solid var(--secondary-color);
+}
+
+/* Garder le lien "Aide" blanc même après visite (override de a:visited global) */
+.help-link:visited,
+.help-link:hover,
+.help-link:active,
+.help-link:focus,
+.help-link:focus-visible {
+    color: var(--white);
 }
 
 .help-link:hover {

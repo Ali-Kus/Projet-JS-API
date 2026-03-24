@@ -141,8 +141,9 @@ class AppController {
                 (countryName) => this.searchByCountry(countryName)
             );
 
-            // Effacer le champ de recherche
-            this.#view.clearSearchInput();
+            // Conserver le champ de recherche rempli pour permettre
+            // de relancer rapidement (ex: après changement d'année).
+            this.#view.armSearchInputAutoClear();
         } catch (error) {
             console.error('Erreur lors de la recherche:', error);
             this.#view.showError(error.message || 'Une erreur est survenue lors de la recherche.');

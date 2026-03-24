@@ -116,8 +116,29 @@ class DomView {
      * @private
      */
     attachEventListeners() {
+        // Auto-clear au clic pour retaper un pays rapidement
+        if (this.#elements.inputSearch) {
+            this.#elements.inputSearch.dataset.clearArmed = '1';
+
+            this.#elements.inputSearch.addEventListener('blur', () => {
+                this.#elements.inputSearch.dataset.clearArmed = '1';
+            });
+
+            this.#elements.inputSearch.addEventListener('click', () => {
+                const input = this.#elements.inputSearch;
+                if (input.dataset.clearArmed === '1' && input.value.trim().length > 0) {
+                    input.value = '';
+                    input.dataset.clearArmed = '0';
+                    this.updateSearchButtonState();
+                }
+            });
+        }
+
         // Activation du bouton quand le champ a du texte
         this.#elements.inputSearch?.addEventListener('input', () => {
+            if (this.#elements.inputSearch) {
+                this.#elements.inputSearch.dataset.clearArmed = '0';
+            }
             this.updateSearchButtonState();
         });
 
@@ -162,7 +183,18 @@ class DomView {
     setSearchInput(value) {
         if (this.#elements.inputSearch) {
             this.#elements.inputSearch.value = value;
+            this.#elements.inputSearch.dataset.clearArmed = '1';
             this.updateSearchButtonState();
+        }
+    }
+
+    /**
+     * Réarme le comportement "click pour vider" du champ de recherche.
+     * Utile après une recherche pour permettre de retaper immédiatement.
+     */
+    armSearchInputAutoClear() {
+        if (this.#elements.inputSearch) {
+            this.#elements.inputSearch.dataset.clearArmed = '1';
         }
     }
 
