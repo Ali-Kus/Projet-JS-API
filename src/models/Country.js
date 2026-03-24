@@ -21,7 +21,7 @@ class DataModel {
      * @type {string}
      * @private
      */
-    #apiKey = 'c13a0b64696991de9074a35f7e15d26599845bfc'; // À remplacer par une clé réelle depuis https://www.census.gov/data/developers/api-key.html
+    #apiKey = ''; // Optionnel: définissez votre clé via setApiKey()
 
     /**
      * Mapping des noms de pays vers codes GENC (ISO 3166-1 alpha-2)
@@ -91,7 +91,7 @@ class DataModel {
      * @returns {Promise<{name: string, population: string, year: number, birthRate: number, deathRate: number}>}
      * @throws {Error} Erreur si le pays n'existe pas ou erreur réseau
      */
-    async getCountryData(countryName) {
+    async getCountryData(countryName, year = new Date().getFullYear()) {
         try {
             // Obtenir le code GENC du pays
             const countryCode = this.#getCountryCode(countryName);
@@ -100,25 +100,61 @@ class DataModel {
                 throw new Error(`Pays "${countryName}" non trouvé. Veuillez vérifier l'orthographe.`);
             }
 
-            // Construire l'URL de requête
-            const url = this.#buildQueryURL(countryCode);
+            const currentYear = new Date().getFullYear();
+            const startYear = 1950;
 
-            // Faire l'appel API
-            const response = await fetch(url);
+            const snapshotVars = ['NAME', 'YR', 'POP', 'BIRTHS', 'DEATHS', 'GR', 'TFR', 'CBR', 'CDR'];
+            const seriesVars = ['NAME', 'YR', 'POP', 'GR', 'TFR'];
 
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error(`Aucune donnée disponible pour "${countryName}".`);
-                }
-                throw new Error(`Erreur API Census: ${response.status} ${response.statusText}`);
+            const snapshotTable = await this.#fetchTable({
+                countryCode,
+                variables: snapshotVars,
+                time: String(year)
+            });
+
+            const seriesTable = await this.#fetchTable({
+                countryCode,
+                variables: seriesVars,
+                time: `from ${startYear} to ${currentYear}`
+            });
+
+            const pyramidTable = await this.#fetchTable({
+                countryCode,
+                variables: ['NAME', 'YR', ...this.#getAgeSexVariables()],
+                time: String(year)
+            });
+
+            const snapshot = this.#parseSingleRow(snapshotTable, countryName);
+            const series = this.#parseSeries(seriesTable);
+            const agePyramid = this.#parseAgePyramid(pyramidTable);
+
+            const populationValue = parseInt(snapshot.POP || '0', 10);
+            const birthsValue = parseInt(snapshot.BIRTHS || '0', 10);
+            const deathsValue = parseInt(snapshot.DEATHS || '0', 10);
+
+            if (!populationValue) {
+                throw new Error(`Aucune donnée de population disponible pour "${countryName}".`);
             }
 
-            const data = await response.json();
+            const computedBirthRate = populationValue ? (birthsValue / populationValue) * 1000 : 0;
+            const computedDeathRate = populationValue ? (deathsValue / populationValue) * 1000 : 0;
 
-            // Parser et formater les résultats
-            const formattedData = this.#parseResponse(data, countryName);
+            const birthRate = snapshot.CBR !== undefined && snapshot.CBR !== '' ? parseFloat(snapshot.CBR) : parseFloat(computedBirthRate.toFixed(2));
+            const deathRate = snapshot.CDR !== undefined && snapshot.CDR !== '' ? parseFloat(snapshot.CDR) : parseFloat(computedDeathRate.toFixed(2));
 
-            return formattedData;
+            return {
+                name: snapshot.NAME || countryName,
+                population: this.#formatPopulation(populationValue),
+                year: parseInt(snapshot.YR || String(year), 10),
+                birthRate,
+                deathRate,
+                births: this.#formatPopulation(birthsValue),
+                deaths: this.#formatPopulation(deathsValue),
+                growthRate: snapshot.GR !== undefined && snapshot.GR !== '' ? parseFloat(snapshot.GR) : undefined,
+                tfr: snapshot.TFR !== undefined && snapshot.TFR !== '' ? parseFloat(snapshot.TFR) : undefined,
+                series,
+                agePyramid
+            };
         } catch (error) {
             // Gestion spécifique des erreurs réseau
             if (error instanceof TypeError) {
@@ -126,6 +162,36 @@ class DataModel {
             }
             throw error;
         }
+    }
+
+    /**
+     * Retourne une liste de pays disponibles pour l'auto-complétion.
+     * Basée sur le mapping interne (noms normalisés → codes GENC).
+     *
+     * @returns {Array<{name: string, code: string}>}
+     */
+    getAllCountries() {
+        const toDisplayName = (normalizedName) => {
+            return normalizedName
+                .split(' ')
+                .filter(Boolean)
+                .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                .join(' ');
+        };
+
+        const seen = new Set();
+        const countries = [];
+
+        for (const [name, code] of Object.entries(this.#countryCodeMap)) {
+            const displayName = toDisplayName(name);
+            const key = `${displayName}|${code}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            countries.push({ name: displayName, code });
+        }
+
+        countries.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+        return countries;
     }
 
     /**
@@ -160,19 +226,130 @@ class DataModel {
      * @returns {string} URL complète de la requête
      * @private
      */
-    #buildQueryURL(countryCode) {
-        // Variables principales : Population (POP), Birth Rate (BIRTHS), Death Rate (DEATHS)
-        const variables = ['NAME', 'POP', 'BIRTHS', 'DEATHS'];
-        const year = 2026; // Année actuelle
-
+    async #fetchTable({ countryCode, variables, time }) {
         const params = new URLSearchParams({
             get: variables.join(','),
-            YR: year,
             'for': `genc standard countries and areas:${countryCode}`,
-            key: this.#apiKey
+            time
         });
 
-        return `${this.#baseURL}?${params.toString()}`;
+        if (this.#apiKey && this.#apiKey.trim().length > 0) {
+            params.set('key', this.#apiKey.trim());
+        }
+
+        const url = `${this.#baseURL}?${params.toString()}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('Aucune donnée disponible pour ce pays/année.');
+            }
+            throw new Error(`Erreur API Census: ${response.status} ${response.statusText}`);
+        }
+
+        return response.json();
+    }
+
+    #parseTable(data) {
+        if (!Array.isArray(data) || data.length < 2) {
+            throw new Error('Format de réponse API invalide');
+        }
+
+        const headers = data[0];
+        const rows = data.slice(1);
+
+        return rows.map(values => {
+            const row = {};
+            headers.forEach((header, index) => {
+                row[header] = values[index];
+            });
+            return row;
+        });
+    }
+
+    #parseSingleRow(tableData, countryName) {
+        const rows = this.#parseTable(tableData);
+        if (!rows.length) {
+            throw new Error(`Aucune donnée disponible pour "${countryName}".`);
+        }
+        return rows[0];
+    }
+
+    #parseSeries(tableData) {
+        const rows = this.#parseTable(tableData)
+            .map(r => ({
+                year: parseInt(r.YR || r.time, 10),
+                pop: r.POP !== undefined ? parseInt(r.POP, 10) : null,
+                gr: r.GR !== undefined && r.GR !== '' ? parseFloat(r.GR) : null,
+                tfr: r.TFR !== undefined && r.TFR !== '' ? parseFloat(r.TFR) : null
+            }))
+            .filter(r => Number.isFinite(r.year))
+            .sort((a, b) => a.year - b.year);
+
+        return {
+            years: rows.map(r => r.year),
+            populations: rows.map(r => (Number.isFinite(r.pop) ? r.pop : null)),
+            growthRates: rows.map(r => (Number.isFinite(r.gr) ? r.gr : null)),
+            tfrRates: rows.map(r => (Number.isFinite(r.tfr) ? r.tfr : null))
+        };
+    }
+
+    #getAgeSexVariables() {
+        const ageKeys = [
+            '0_4', '5_9', '10_14', '15_19', '20_24', '25_29', '30_34', '35_39',
+            '40_44', '45_49', '50_54', '55_59', '60_64', '65_69', '70_74', '75_79',
+            '80_84', '85_89', '90_94', '95_99', '100_'
+        ];
+
+        const vars = [];
+        for (const key of ageKeys) {
+            vars.push(`MPOP${key}`);
+            vars.push(`FPOP${key}`);
+        }
+        return vars;
+    }
+
+    #parseAgePyramid(tableData) {
+        const row = this.#parseSingleRow(tableData, '');
+
+        const buckets = [
+            { label: '0-4', keys: ['0_4'] },
+            { label: '5-9', keys: ['5_9'] },
+            { label: '10-14', keys: ['10_14'] },
+            { label: '15-19', keys: ['15_19'] },
+            { label: '20-24', keys: ['20_24'] },
+            { label: '25-29', keys: ['25_29'] },
+            { label: '30-34', keys: ['30_34'] },
+            { label: '35-39', keys: ['35_39'] },
+            { label: '40-44', keys: ['40_44'] },
+            { label: '45-49', keys: ['45_49'] },
+            { label: '50-54', keys: ['50_54'] },
+            { label: '55-59', keys: ['55_59'] },
+            { label: '60-64', keys: ['60_64'] },
+            { label: '65-69', keys: ['65_69'] },
+            { label: '70-74', keys: ['70_74'] },
+            { label: '75-79', keys: ['75_79'] },
+            { label: '80+', keys: ['80_84', '85_89', '90_94', '95_99', '100_'] }
+        ];
+
+        const ageGroups = buckets.map(b => b.label);
+        const males = [];
+        const females = [];
+
+        for (const bucket of buckets) {
+            let m = 0;
+            let f = 0;
+            for (const key of bucket.keys) {
+                const mVal = parseInt(row[`MPOP${key}`] || '0', 10);
+                const fVal = parseInt(row[`FPOP${key}`] || '0', 10);
+                m += Number.isFinite(mVal) ? mVal : 0;
+                f += Number.isFinite(fVal) ? fVal : 0;
+            }
+            males.push(-m);
+            females.push(f);
+        }
+
+        return { ageGroups, males, females };
     }
 
     /**
@@ -183,44 +360,7 @@ class DataModel {
      * @returns {Object} Objet formaté { name, population, year, birthRate, deathRate }
      * @private
      */
-    #parseResponse(data, countryName) {
-        // L'API retourne un tableau avec headers en première ligne
-        if (!Array.isArray(data) || data.length < 2) {
-            throw new Error('Format de réponse API invalide');
-        }
-
-        const headers = data[0];
-        const values = data[1];
-
-        // Créer un objet avec les en-têtes et valeurs
-        const result = {};
-        headers.forEach((header, index) => {
-            result[header] = values[index];
-        });
-
-        // Extraire et formater les données
-        const populationValue = parseInt(result['POP'] || '0', 10);
-        const birthsValue = parseInt(result['BIRTHS'] || '0', 10);
-        const deathsValue = parseInt(result['DEATHS'] || '0', 10);
-
-        if (populationValue === 0) {
-            throw new Error(`Aucune donnée de population disponible pour "${countryName}".`);
-        }
-
-        // Calculer les taux (pour 1000 habitants)
-        const birthRate = ((birthsValue / populationValue) * 1000).toFixed(2);
-        const deathRate = ((deathsValue / populationValue) * 1000).toFixed(2);
-
-        return {
-            name: result['NAME'] || countryName,
-            population: this.#formatPopulation(populationValue),
-            year: 2026,
-            birthRate: parseFloat(birthRate),
-            deathRate: parseFloat(deathRate),
-            births: this.#formatPopulation(birthsValue),
-            deaths: this.#formatPopulation(deathsValue)
-        };
-    }
+    // #parseResponse supprimé: remplacé par #parseTable/#parseSingleRow
 
     /**
      * Formate un nombre de population avec séparateurs de milliers

@@ -6,10 +6,20 @@
  * - Gérer le rendu des données de pays
  * - Afficher/masquer les favoris
  * - Gérer l'affichage du loader et des erreurs
+ * - Gérer les visualisations graphiques via ResultView
  * - Unique point de contact avec le document HTML
  */
 
+import ResultView from './ResultView.js';
+
 class DomView {
+    /**
+     * Stocke l'instance de ResultView pour la gestion des graphiques
+     * @type {ResultView}
+     * @private
+     */
+    #resultView = null;
+
     /**
      * Références aux éléments DOM importants
      * @type {Object}
@@ -17,6 +27,7 @@ class DomView {
      */
     #elements = {
         inputSearch: document.getElementById('input-search'),
+        selectYear: document.getElementById('select-year'),
         btnSearch: document.getElementById('btn-search'),
         loaderContainer: document.getElementById('bloc-gif-attente'),
         resultsContainer: document.getElementById('results-container'),
@@ -30,7 +41,74 @@ class DomView {
     constructor() {
         // Initialisation des états
         this.currentCountryName = null;
+        this.populateYearSelect();
         this.attachEventListeners();
+    }
+
+    /**
+     * Remplit la datalist avec les suggestions de pays.
+     * @param {Array<{name: string, code?: string}>} countries
+     */
+    renderSuggestions(countries) {
+        const datalist = document.getElementById('countries-list');
+        if (!datalist) return;
+
+        if (!Array.isArray(countries) || countries.length === 0) {
+            datalist.innerHTML = '';
+            return;
+        }
+
+        datalist.innerHTML = countries
+            .map(c => `<option value="${this.#escapeHTML(c.name)}"></option>`)
+            .join('');
+    }
+
+    /**
+     * Remplit le select d'année (1950 → année courante)
+     */
+    populateYearSelect() {
+        const select = this.#elements.selectYear;
+        if (!select) return;
+
+        const currentYear = new Date().getFullYear();
+        const startYear = 1950;
+
+        select.innerHTML = '';
+
+        for (let year = currentYear; year >= startYear; year--) {
+            const option = document.createElement('option');
+            option.value = String(year);
+            option.textContent = String(year);
+            select.appendChild(option);
+        }
+
+        select.value = String(currentYear);
+    }
+
+    /**
+     * Définit l'année sélectionnée
+     * @param {number} year
+     */
+    setSelectedYear(year) {
+        const select = this.#elements.selectYear;
+        if (!select) return;
+        const value = String(year);
+        // Si l'option n'existe pas, on ne change rien
+        if ([...select.options].some(o => o.value === value)) {
+            select.value = value;
+        }
+    }
+
+    /**
+     * Récupère l'année sélectionnée
+     * @returns {number}
+     */
+    getSelectedYear() {
+        const select = this.#elements.selectYear;
+        const currentYear = new Date().getFullYear();
+        if (!select) return currentYear;
+        const parsed = parseInt(select.value, 10);
+        return Number.isFinite(parsed) ? parsed : currentYear;
     }
 
     /**
@@ -75,6 +153,17 @@ class DomView {
     getSearchInput() {
         const input = this.#elements.inputSearch?.value.trim() || '';
         return input;
+    }
+
+    /**
+     * Définit la valeur du champ de recherche
+     * @param {string} value - La valeur à définir
+     */
+    setSearchInput(value) {
+        if (this.#elements.inputSearch) {
+            this.#elements.inputSearch.value = value;
+            this.updateSearchButtonState();
+        }
     }
 
     /**
@@ -130,7 +219,7 @@ class DomView {
     }
 
     /**
-     * Affiche les résultats de la recherche
+     * Affiche les résultats de la recherche (info + visualisations graphiques)
      * 
      * @param {Object} data - Les données du pays { name, population, year, birthRate, deathRate }
      * @param {boolean} isFav - Si le pays est en favori
@@ -178,31 +267,30 @@ class DomView {
                     </div>
                 </div>
                 <div class="result-actions">
-                    <button 
-                        class="star-btn ${starClass}" 
-                        data-country="${this.#escapeHTML(data.name)}"
-                        aria-label="${isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}"
-                        title="${isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}"
-                    >
-                        ${starSymbol}
+                    <button class="star-btn" data-country="${this.#escapeHTML(data.name)}" aria-label="Ajouter ou retirer des favoris">
+                        <span class="${starClass}">${starSymbol}</span>
                     </button>
                 </div>
             </div>
+            <div id="visualizations-container"></div>
         `;
 
         this.#elements.resultsContainer.innerHTML = resultHTML;
 
-        // Attacher le listener au bouton étoile
-        if (onStarClick) {
-            const starBtn = this.#elements.resultsContainer.querySelector('.star-btn');
-            starBtn?.addEventListener('click', (e) => {
-                onStarClick(data.name, isFav);
-            });
+        // Initialiser ResultView si ce n'est pas déjà fait
+        if (!this.#resultView) {
+            this.#resultView = new ResultView();
         }
 
-        // Masquer le message "Aucun résultat"
-        if (this.#elements.noResultsMsg) {
-            this.#elements.noResultsMsg.style.display = 'none';
+        // Afficher les visualisations graphiques
+        this.#resultView.renderVisualizations('visualizations-container', data);
+
+        // Attacher le listener pour le clic sur l'étoile
+        const starButton = this.#elements.resultsContainer.querySelector('.star-btn');
+        if (starButton && onStarClick) {
+            starButton.addEventListener('click', () => {
+                onStarClick(data.name, isFav);
+            });
         }
     }
 
@@ -228,14 +316,17 @@ class DomView {
         const starBtn = this.#elements.resultsContainer?.querySelector('.star-btn');
         if (!starBtn) return;
 
+        const starSpan = starBtn.querySelector('span');
+        if (!starSpan) return;
+
         const starSymbol = isFav ? '★' : '☆';
         const newClass = isFav ? 'star-full' : 'star-empty';
         const oldClass = isFav ? 'star-empty' : 'star-full';
         const ariaLabel = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
 
-        starBtn.textContent = starSymbol;
-        starBtn.classList.remove(oldClass);
-        starBtn.classList.add(newClass);
+        starSpan.textContent = starSymbol;
+        starSpan.classList.remove(oldClass);
+        starSpan.classList.add(newClass);
         starBtn.setAttribute('aria-label', ariaLabel);
         starBtn.setAttribute('title', ariaLabel);
 
@@ -332,6 +423,29 @@ class DomView {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    /**
+     * Affiche les visualisations graphiques via ResultView
+     * 
+     * @param {Object} data - Données du pays
+     * @private
+     */
+    #renderVisualizations(data) {
+        try {
+            // Détruire l'ancienne instance si elle existe
+            if (this.#resultView) {
+                this.#resultView.destroy();
+            }
+
+            // Créer une nouvelle instance de ResultView
+            this.#resultView = new ResultView();
+
+            // Afficher les visualisations
+            this.#resultView.renderVisualizations('visualizations-container', data);
+        } catch (error) {
+            console.error('Erreur lors de l\'affichage des visualisations:', error);
+        }
     }
 
     /**

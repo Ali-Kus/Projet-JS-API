@@ -34,9 +34,12 @@
                     <input 
                         type="text" 
                         id="input-search" 
+                        list="countries-list"
                         placeholder="Entrez le nom d'un pays..."
                         aria-label="Rechercher un pays"
                     >
+                    <datalist id="countries-list"></datalist>
+                    <select id="select-year" aria-label="Année de référence"></select>
                     <button id="btn-search" disabled aria-label="Lancer la recherche">
                         Rechercher
                     </button>
@@ -62,6 +65,9 @@
             </div>
         </main>
     </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <!-- Scripts avec modules ES6 -->
     <script type="module" src="src/main.js"></script>

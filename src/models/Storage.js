@@ -122,6 +122,59 @@ class StorageModel {
             return false;
         }
     }
+
+    /**
+     * Sauvegarde la dernière recherche
+     * @param {string} countryName - Nom du pays recherché
+     */
+    saveLastSearch(countryName) {
+        try {
+            localStorage.setItem('lastSearch', countryName);
+        } catch (error) {
+            console.error('Erreur lors de la sauvegarde de la dernière recherche:', error);
+        }
+    }
+
+    /**
+     * Récupère la dernière recherche
+     * @returns {string|null} Le nom du dernier pays recherché ou null
+     */
+    getLastSearch() {
+        try {
+            return localStorage.getItem('lastSearch');
+        } catch (error) {
+            console.error('Erreur lors de la récupération de la dernière recherche:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Sauvegarde la dernière année sélectionnée
+     * @param {number} year
+     */
+    saveLastYear(year) {
+        try {
+            localStorage.setItem('lastYear', String(year));
+        } catch (error) {
+            console.error("Erreur lors de la sauvegarde de l'année:", error);
+        }
+    }
+
+    /**
+     * Récupère la dernière année sélectionnée
+     * @returns {number|null}
+     */
+    getLastYear() {
+        try {
+            const value = localStorage.getItem('lastYear');
+            if (!value) return null;
+            const parsed = parseInt(value, 10);
+            return Number.isFinite(parsed) ? parsed : null;
+        } catch (error) {
+            console.error("Erreur lors de la récupération de l'année:", error);
+            return null;
+        }
+    }
 }
 
 export default StorageModel;

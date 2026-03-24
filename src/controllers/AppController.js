@@ -55,6 +55,27 @@ class AppController {
         // Afficher les favoris au démarrage
         this.refreshFavoritesList();
 
+        // Charger les suggestions de pays (auto-complétion)
+        try {
+            const countries = this.#dataModel.getAllCountries();
+            this.#view.renderSuggestions(countries);
+        } catch (error) {
+            console.warn('Impossible de charger les suggestions de pays:', error);
+        }
+
+        // Restaurer la dernière année sélectionnée
+        const lastYear = this.#storageModel.getLastYear();
+        if (lastYear) {
+            this.#view.setSelectedYear(lastYear);
+        }
+
+        // Lancer la recherche au rechargement de la page
+        const lastSearch = this.#storageModel.getLastSearch();
+        if (lastSearch) {
+            this.#view.setSearchInput(lastSearch);
+            this.handleSearch();
+        }
+
         // Attacher les listeners pour la recherche
         this.attachSearchListener();
         this.attachFavoritesListeners();
@@ -90,11 +111,16 @@ class AppController {
      */
     async handleSearch() {
         const searchTerm = this.#view.getSearchInput();
+        const selectedYear = this.#view.getSelectedYear();
 
         if (!searchTerm) {
             this.#view.showError('Veuillez entrer un nom de pays');
             return;
         }
+
+        // Sauvegarder la recherche
+        this.#storageModel.saveLastSearch(searchTerm);
+        this.#storageModel.saveLastYear(selectedYear);
 
         // Afficher le loader
         this.#view.toggleLoader(true);
@@ -102,7 +128,7 @@ class AppController {
 
         try {
             // Récupérer les données de l'API
-            const countryData = await this.#dataModel.getCountryData(searchTerm);
+            const countryData = await this.#dataModel.getCountryData(searchTerm, selectedYear);
 
             // Vérifier si le pays est en favori
             const isFav = this.#storageModel.isFav(countryData.name);
