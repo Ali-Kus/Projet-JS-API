@@ -104,7 +104,7 @@ class DataModel {
             const startYear = 1950;
 
             const snapshotVars = ['NAME', 'YR', 'POP', 'BIRTHS', 'DEATHS', 'GR', 'TFR', 'CBR', 'CDR'];
-            const seriesVars = ['NAME', 'YR', 'POP', 'GR', 'TFR'];
+            const seriesVars = ['NAME', 'YR', 'POP', 'GR', 'TFR', 'CDR'];
 
             const snapshotTable = await this.#fetchTable({
                 countryCode,
@@ -281,7 +281,8 @@ class DataModel {
                 year: parseInt(r.YR || r.time, 10),
                 pop: r.POP !== undefined ? parseInt(r.POP, 10) : null,
                 gr: r.GR !== undefined && r.GR !== '' ? parseFloat(r.GR) : null,
-                tfr: r.TFR !== undefined && r.TFR !== '' ? parseFloat(r.TFR) : null
+                tfr: r.TFR !== undefined && r.TFR !== '' ? parseFloat(r.TFR) : null,
+                cdr: r.CDR !== undefined && r.CDR !== '' ? parseFloat(r.CDR) : null
             }))
             .filter(r => Number.isFinite(r.year))
             .sort((a, b) => a.year - b.year);
@@ -290,7 +291,8 @@ class DataModel {
             years: rows.map(r => r.year),
             populations: rows.map(r => (Number.isFinite(r.pop) ? r.pop : null)),
             growthRates: rows.map(r => (Number.isFinite(r.gr) ? r.gr : null)),
-            tfrRates: rows.map(r => (Number.isFinite(r.tfr) ? r.tfr : null))
+            tfrRates: rows.map(r => (Number.isFinite(r.tfr) ? r.tfr : null)),
+            deathRates: rows.map(r => (Number.isFinite(r.cdr) ? r.cdr : null))
         };
     }
 

@@ -8,6 +8,11 @@
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
 :root {
     --primary-color: #2c3e50;
     --secondary-color: #3498db;
@@ -38,6 +43,7 @@ body {
 .container {
     display: flex;
     min-height: 100vh;
+    height: 100vh;
     gap: 0;
 }
 
@@ -45,7 +51,7 @@ body {
     width: 280px;
     background-color: var(--primary-color);
     color: var(--white);
-    padding: 2rem;
+    padding: 1.5rem;
     overflow-y: auto;
     box-shadow: var(--shadow);
 }
@@ -80,8 +86,11 @@ body {
 
 .main-content {
     flex: 1;
-    padding: 2rem;
-    overflow-y: auto;
+    padding: 1.25rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 /* ========================================
@@ -89,13 +98,13 @@ body {
    ======================================== */
 
 header {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
     border-bottom: 3px solid var(--secondary-color);
 }
 
 header h1 {
-    font-size: 2.5rem;
+    font-size: 2.1rem;
     color: var(--primary-color);
     margin-bottom: 0.5rem;
 }
@@ -110,17 +119,35 @@ header h1 {
    ======================================== */
 
 .search-section {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .search-container {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
+}
+
+#select-year {
+    padding: 0.55rem 0.9rem;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: var(--white);
+    color: var(--text-dark);
+    transition: var(--transition);
+    min-width: 110px;
+
+}
+
+#select-year:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 #input-search {
     flex: 1;
-    padding: 0.75rem 1rem;
+    padding: 0.55rem 0.9rem;
     border: 2px solid var(--border-color);
     border-radius: 4px;
     font-size: 1rem;
@@ -134,7 +161,7 @@ header h1 {
 }
 
 #btn-search {
-    padding: 0.75rem 2rem;
+    padding: 0.55rem 1.4rem;
     background-color: var(--secondary-color);
     color: var(--white);
     border: none;
@@ -200,14 +227,27 @@ header h1 {
    ======================================== */
 
 .results-section {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .results-container {
     background-color: var(--white);
     border-radius: 8px;
-    padding: 1.5rem;
+    padding: 1rem;
     box-shadow: var(--shadow);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#visualizations-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .message {
@@ -225,18 +265,12 @@ header h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem;
+    padding: 1rem;
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     transition: var(--transition);
     background-color: var(--white);
-}
-
-.result-card:hover {
-    box-shadow: var(--shadow-lg);
-    border-color: var(--secondary-color);
-    transform: translateX(4px);
 }
 
 .result-card:last-child {
@@ -248,16 +282,16 @@ header h1 {
 }
 
 .result-country-name {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: var(--primary-color);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .result-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.6rem;
 }
 
 .result-population,
@@ -266,9 +300,9 @@ header h1 {
 .result-death-rate,
 .result-births,
 .result-deaths {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--text-dark);
-    padding: 0.5rem;
+    padding: 0.35rem;
     border-left: 3px solid var(--secondary-color);
     padding-left: 0.75rem;
 }
@@ -453,6 +487,7 @@ header h1 {
     }
 
     #input-search,
+    #select-year,
     #btn-search {
         width: 100%;
     }
@@ -535,5 +570,292 @@ a:visited {
     * {
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========================================
+   Visualisations Graphiques
+   ======================================== */
+
+.visualizations-section {
+    background-color: var(--white);
+    border-radius: 8px;
+    padding: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    animation: fadeIn 0.4s ease;
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr minmax(240px, 320px);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+        "header header"
+        "tabsHeader ."
+        "tabsContent pyramid";
+    gap: 0.5rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.visualization-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--secondary-color);
+    grid-area: header;
+}
+
+.visualization-header h2 {
+    font-size: 1.25rem;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.analysis-year {
+    color: var(--text-light);
+    font-size: 0.8rem;
+}
+
+.visualizations-main {
+    display: contents;
+}
+
+.chart-wrapper {
+    background-color: var(--white);
+    border-radius: 6px;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+    height: 100%;
+    min-height: 0;
+    width: 100%;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.chart-wrapper:hover {
+    box-shadow: var(--shadow);
+    border-color: var(--secondary-color);
+}
+
+.chart-pyramid {
+    grid-area: pyramid;
+    justify-self: end;
+    max-width: 320px;
+    max-height: clamp(320px, 48vh, 520px);
+}
+
+.chart-evolution {
+    grid-area: evolution;
+}
+
+
+.chart-canvas {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.chart-canvas canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.chart-title {
+    margin-bottom: 0.5rem;
+}
+
+.chart-title h3 {
+    font-size: 1rem;
+    color: var(--primary-color);
+    margin-bottom: 0.15rem;
+}
+
+.chart-subtitle {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+/* ========================================
+   Système d'Onglets
+   ======================================== */
+
+.visualizations-tabs {
+    display: contents;
+}
+
+.tabs-header {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+    grid-area: tabsHeader;
+}
+
+.tab-btn {
+    padding: 0.45rem 1rem;
+    background-color: var(--light-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    transition: var(--transition);
+}
+
+.tab-btn:hover:not(.active) {
+    background-color: #d5dbdb;
+    border-color: var(--secondary-color);
+}
+
+.tab-btn.active {
+    background-color: var(--secondary-color);
+    color: var(--white);
+    border-color: var(--secondary-color);
+    box-shadow: 0 -2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+    grid-area: tabsContent;
+}
+
+.tab-content.active {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.tab-content .chart-wrapper {
+    height: 100%;
+    min-height: 0;
+    max-height: clamp(360px, 52vh, 620px);
+}
+
+/* Desktop compact (Full HD et +) */
+@media (min-width: 1200px) and (min-height: 800px) {
+    .container {
+        min-height: 100dvh;
+        height: 100dvh;
+    }
+
+    .sidebar {
+        width: 260px;
+    }
+
+    header h1 {
+        font-size: 2rem;
+    }
+}
+
+/* ========================================
+   Graphiques - Responsive
+   ======================================== */
+
+@media (max-width: 1024px) {
+    .visualizations-section {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto 1fr;
+        grid-template-areas:
+            "header"
+            "pyramid"
+            "tabsHeader"
+            "tabsContent";
+    }
+
+    .chart-pyramid {
+        justify-self: stretch;
+        max-width: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .visualizations-section {
+        padding: 1rem;
+    }
+
+    .visualization-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .chart-pyramid {
+        min-height: 320px;
+    }
+
+    .chart-evolution {
+        min-height: 250px;
+    }
+
+    .tabs-header {
+        gap: 0.5rem;
+    }
+
+    .tab-btn {
+        padding: 0.5rem 0.9rem;
+        font-size: 0.8rem;
+    }
+
+    .chart-title h3 {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .visualizations-section {
+        padding: 0.8rem;
+    }
+
+    .visualization-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .chart-pyramid {
+        min-height: 280px;
+    }
+
+    .chart-evolution {
+        min-height: 220px;
+    }
+
+    .chart-wrapper {
+        padding: 0.8rem;
+    }
+
+    .chart-title h3 {
+        font-size: 0.95rem;
+    }
+
+    .chart-subtitle {
+        font-size: 0.75rem;
+    }
+
+    .tabs-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .tab-btn {
+        width: 100%;
+        padding: 0.5rem 0.8rem;
+        border-radius: 4px;
+    }
+
+    .tab-btn.active {
+        border-radius: 4px;
     }
 }

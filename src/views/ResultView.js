@@ -95,18 +95,19 @@ class ResultView {
      * @private
      */
     #createVisualizationsStructure(container, data) {
+        const displayYear = (data.year ?? new Date().getFullYear());
+
         const html = `
             <div class="visualizations-section">
                 <div class="visualization-header">
-                    <h2> Analyse Démographique - ${data.name}</h2>
-                    <p class="analysis-year">Année de référence: ${data.year || 2026}</p>
+                    <h2> Analyse Démographique - ${data.name} (${displayYear})</h2>
                 </div>
 
                 <div class="visualizations-main">
                     <!-- Pyramide des Âges -->
                     <div class="chart-wrapper chart-pyramid">
                         <div class="chart-title">
-                            <h3>Pyramide des Âges</h3>
+                            <h3>Pyramide des Âges (${displayYear})</h3>
                         </div>
                         <div class="chart-canvas">
                             <canvas id="agePyramidChart"></canvas>
@@ -125,6 +126,9 @@ class ResultView {
                         </button>
                         <button class="tab-btn" data-tab="fertility">
                              Taux de Fécondité
+                        </button>
+                        <button class="tab-btn" data-tab="mortality">
+                            Taux de Mortalité
                         </button>
                     </div>
 
@@ -161,6 +165,18 @@ class ResultView {
                             </div>
                             <div class="chart-canvas">
                                 <canvas id="fertilityRateChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-mortality" class="tab-content">
+                        <div class="chart-wrapper">
+                            <div class="chart-title">
+                                <h3>Taux de Mortalité (‰)</h3>
+                                <p class="chart-subtitle">Décès pour 1 000 habitants (CDR)</p>
+                            </div>
+                            <div class="chart-canvas">
+                                <canvas id="deathRateChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -317,6 +333,68 @@ class ResultView {
         this.#renderPopulationEvolution(data);
         this.#renderGrowthRateChart(data);
         this.#renderFertilityRateChart(data);
+        this.#renderDeathRateChart(data);
+    }
+
+    /**
+     * Affiche le Taux de Mortalité (CDR)
+     * @private
+     */
+    #renderDeathRateChart(data) {
+        const ctx = document.getElementById('deathRateChart');
+        if (!ctx) return;
+
+        if (!this.#hasSeries(data)) return;
+        const deathRates = data.series.deathRates;
+        if (!Array.isArray(deathRates)) return;
+
+        const mortalityData = {
+            years: data.series.years,
+            rates: deathRates
+        };
+
+        this.#charts.deathRate = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: mortalityData.years,
+                datasets: [{
+                    label: 'Taux de mortalité (‰)',
+                    data: mortalityData.rates,
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#e74c3c'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            padding: 15,
+                            font: { size: 12, weight: 'bold' }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(1) + '‰';
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -462,6 +540,8 @@ class ResultView {
                     setTimeout(() => this.#charts.growthRate.resize(), 100);
                 } else if (tabName === 'fertility' && this.#charts.fertilityRate) {
                     setTimeout(() => this.#charts.fertilityRate.resize(), 100);
+                } else if (tabName === 'mortality' && this.#charts.deathRate) {
+                    setTimeout(() => this.#charts.deathRate.resize(), 100);
                 }
             });
         });

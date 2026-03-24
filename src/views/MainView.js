@@ -235,15 +235,16 @@ class DomView {
         const starSymbol = isFav ? '★' : '☆';
         const starClass = isFav ? 'star-full' : 'star-empty';
 
+        const displayYear = (data.year ?? new Date().getFullYear());
+
         const resultHTML = `
             <div class="result-card">
                 <div class="result-info">
-                    <div class="result-country-name">${this.#escapeHTML(data.name)}</div>
+                    <div class="result-country-name">${this.#escapeHTML(data.name)} (${displayYear})</div>
                     <div class="result-stats">
                         <div class="result-population">
                             Population: <strong>${data.population}</strong> habitants
                         </div>
-                        <div class="result-year">Année: ${data.year}</div>
                         ${data.birthRate !== undefined ? `
                         <div class="result-birth-rate">
                             Taux de natalité: <strong>${data.birthRate}‰</strong>
