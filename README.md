@@ -1,6 +1,6 @@
 # Analyse Démographique Mondiale
 
-![](./docs/showcase.png)
+![](./docs/img.png)
 
 Application web en **JavaScript vanilla (ES Modules)** qui interroge l'API **Census.gov (IDB 5-year)** pour afficher des indicateurs démographiques (population, naissances, décès, taux...) et des **visualisations Chart.js** (pyramide des âges, évolution de la population, croissance, fécondité, mortalité).
 
