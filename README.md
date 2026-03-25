@@ -3,6 +3,7 @@
 ![](./docs/img.png)
 
 https://ali-kus.github.io/Projet-JS-API/
+
 Application web en **JavaScript vanilla (ES Modules)** qui interroge l'API **Census.gov (IDB 5-year)** pour afficher des indicateurs démographiques (population, naissances, décès, taux...) et des **visualisations Chart.js** (pyramide des âges, évolution de la population, croissance, fécondité, mortalité).
 
 Projet réalisé dans le cadre d'un TP (architecture **MVC**).
